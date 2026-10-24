@@ -1,5 +1,21 @@
-services:
-  - name: windmill
-    namespace: windmill
-    type: longrun
-    run: /run.sh
+#!/usr/bin/env bash
+# s6-overlay service: Windmill orchestration platform.
+# Runs in foreground under s6 supervision. Restart strategy: default
+# (restart on non-zero exit).
+set -e
+
+# Source the env file written by /etc/cont-init.d/10-config.
+# s6-overlay runs cont-init and the service as separate process trees,
+# so `export` from cont-init never reaches us — must re-source.
+if [ -f /tmp/.windmill-env ]; then
+    set -a
+    . /tmp/.windmill-env
+    set +a
+fi
+
+echo "[windmill/run] uid=$(id -u) cwd=$(pwd)"
+echo "[windmill/run] DATABASE_URL=${DATABASE_URL:-<unset>}"
+echo "[windmill/run] BASE_URL=${BASE_URL:-<unset>}"
+echo "[windmill/run] DATA_PATH=${DATA_PATH:-/share/windmill}"
+
+exec /run.sh
