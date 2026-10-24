@@ -1,11 +1,9 @@
-#!/usr/bin/bashio
+#!/usr/bin/env bashio
 # Load HA options and export as env for Windmill.
-# bashio enables nounset (set -u) on source — disable it immediately so
-# bashio::config returning empty doesn't crash us.
+# bashio shebang sources its own lib — do NOT source /usr/bin/bashio again
+# (causes "__BASHIO_LIB_DIR: readonly variable" crash).
 set +u
 set +e
-
-source /usr/bin/bashio
 
 DATABASE_URL=$(bashio::config 'database_url' '')
 BASE_URL=$(bashio::config 'base_url' 'http://homeassistant.local:8000')
@@ -14,10 +12,6 @@ LOG_LEVEL=$(bashio::config 'log_level' 'info')
 DATA_PATH=$(bashio::config 'data_path' '/share/windmill')
 
 # Write env file for run.sh
-# Upstream env vars (from docker-compose.yml):
-#   DATABASE_URL  — Postgres connection string (required)
-#   MODE          — 'server' or 'worker' (default: both in one process)
-#   BASE_URL      — public URL (optional, for generating links)
 {
     echo "DATABASE_URL=${DATABASE_URL}"
     echo "MODE=server"
