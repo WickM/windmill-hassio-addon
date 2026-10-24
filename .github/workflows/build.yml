@@ -6,17 +6,22 @@ on:
 permissions:
   contents: read
   packages: write
-
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         arch: [amd64]
     steps:
       - uses: actions/checkout@v4
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+      - name: Extract version from config.yaml
+        id: version
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.40.5/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          V=$(yq '.version' config.yaml)
+          echo "v=$V" >> $GITHUB_OUTPUT
+          echo "Extracted version: $V"
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Login to GHCR
@@ -31,4 +36,7 @@ jobs:
           context: .
           push: true
           platforms: linux/amd64
-          tags: ghcr.io/wickm/windmill-hassio-addon:latest,ghcr.io/wickm/windmill-hassio-addon:${{ github.ref_name }}
+          tags: |
+            ghcr.io/wickm/windmill-hassio-addon:latest
+            ghcr.io/wickm/windmill-hassio-addon:${{ steps.version.outputs.v }}
+            ghcr.io/wickm/windmill-hassio-addon:v${{ steps.version.outputs.v }}
