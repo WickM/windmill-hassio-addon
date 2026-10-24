@@ -1,7 +1,5 @@
-#!/usr/bin/env bashio
+#!/usr/bin/bashio
 # Load HA options and export as env for Windmill.
-# bashio shebang sources its own lib — do NOT source /usr/bin/bashio again
-# (causes "__BASHIO_LIB_DIR: readonly variable" crash).
 set +u
 set +e
 
@@ -10,6 +8,16 @@ BASE_URL=$(bashio::config 'base_url' 'http://homeassistant.local:8000')
 WORKER_COUNT=$(bashio::config 'worker_count' '1')
 LOG_LEVEL=$(bashio::config 'log_level' 'info')
 DATA_PATH=$(bashio::config 'data_path' '/share/windmill')
+
+# Fallback: if bashio returned empty, try reading /data/options.json directly
+if [ -z "${DATABASE_URL}" ] && [ -f /data/options.json ]; then
+    DATABASE_URL=$(jq -r '.database_url // empty' /data/options.json)
+    BASE_URL=$(jq -r '.base_url // empty' /data/options.json)
+    [ -z "${BASE_URL}" ] && BASE_URL="http://homeassistant.local:8000"
+    WORKER_COUNT=$(jq -r '.worker_count // "1"' /data/options.json)
+    LOG_LEVEL=$(jq -r '.log_level // "info"' /data/options.json)
+    DATA_PATH=$(jq -r '.data_path // "/share/windmill"' /data/options.json)
+fi
 
 # Write env file for run.sh
 {
@@ -21,4 +29,4 @@ DATA_PATH=$(bashio::config 'data_path' '/share/windmill')
 } > /tmp/.windmill-env
 
 mkdir -p "${DATA_PATH}"
-echo "[10-config] env written, DATA_PATH=${DATA_PATH}"
+echo "[10-config] env written, DATABASE_URL=${DATABASE_URL}, DATA_PATH=${DATA_PATH}"
