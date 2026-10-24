@@ -1,13 +1,17 @@
-#!/usr/bin/env bashio
+#!/usr/bin/bashio
 # Load HA options and export as env for Windmill.
-set -e
+# bashio enables nounset (set -u) on source — disable it immediately so
+# bashio::config returning empty doesn't crash us.
+set +u
+set +e
 
-OPTIONS=$(bashio::config)
-DATABASE_URL=$(bashio::config 'database_url')
-BASE_URL=$(bashio::config 'base_url')
-WORKER_COUNT=$(bashio::config 'worker_count')
-LOG_LEVEL=$(bashio::config 'log_level')
-DATA_PATH=$(bashio::config 'data_path')
+source /usr/bin/bashio
+
+DATABASE_URL=$(bashio::config 'database_url' '')
+BASE_URL=$(bashio::config 'base_url' 'http://homeassistant.local:8000')
+WORKER_COUNT=$(bashio::config 'worker_count' '1')
+LOG_LEVEL=$(bashio::config 'log_level' 'info')
+DATA_PATH=$(bashio::config 'data_path' '/share/windmill')
 
 # Write env file for run.sh
 # Upstream env vars (from docker-compose.yml):
@@ -23,3 +27,4 @@ DATA_PATH=$(bashio::config 'data_path')
 } > /tmp/.windmill-env
 
 mkdir -p "${DATA_PATH}"
+echo "[10-config] env written, DATA_PATH=${DATA_PATH}"
