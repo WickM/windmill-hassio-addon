@@ -1,0 +1,35 @@
+name: Windmill
+version: "0.1.0"
+slug: windmill
+description: Windmill — open-source, code-first orchestration platform for internal software. Sidecar for Home Assistant.
+url: https://github.com/WickM/windmill-hassio-addon
+webui: "[PROTO:http]://[HOST]:[PORT:8000]"
+arch:
+  - aarch64
+  - amd64
+init: false
+startup: services
+map:
+  - share:rw
+backup: hot
+backup_exclude:
+  - "**/logs"
+  - "**/cache"
+  - "**/.cache"
+schema:
+  database_url: str
+  base_url: str?
+  worker_count: int?
+  log_level: str?
+  data_path: str?
+options:
+  database_url: "postgres://windmill:windmill@homeassistant:5432/windmill?sslmode=disable"
+  base_url: "http://homeassistant.local:8000"
+  worker_count: 1
+  log_level: info
+  data_path: /share/windmill
+ports:
+  8000/tcp: 8000
+ports_description:
+  8000/tcp: Windmill UI + API
+image: ghcr.io/wickm/windmill-hassio-addon

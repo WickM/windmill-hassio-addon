@@ -1,0 +1,5 @@
+services:
+  - name: windmill
+    namespace: windmill
+    type: longrun
+    run: /run.sh

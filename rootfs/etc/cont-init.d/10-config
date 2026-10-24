@@ -1,0 +1,25 @@
+#!/usr/bin/env bashio
+# Load HA options and export as env for Windmill.
+set -e
+
+OPTIONS=$(bashio::config)
+DATABASE_URL=$(bashio::config 'database_url')
+BASE_URL=$(bashio::config 'base_url')
+WORKER_COUNT=$(bashio::config 'worker_count')
+LOG_LEVEL=$(bashio::config 'log_level')
+DATA_PATH=$(bashio::config 'data_path')
+
+# Write env file for run.sh
+# Upstream env vars (from docker-compose.yml):
+#   DATABASE_URL  — Postgres connection string (required)
+#   MODE          — 'server' or 'worker' (default: both in one process)
+#   BASE_URL      — public URL (optional, for generating links)
+{
+    echo "DATABASE_URL=${DATABASE_URL}"
+    echo "MODE=server"
+    echo "BASE_URL=${BASE_URL}"
+    echo "RUST_LOG=${LOG_LEVEL}"
+    echo "DATA_PATH=${DATA_PATH}"
+} > /tmp/.windmill-env
+
+mkdir -p "${DATA_PATH}"
