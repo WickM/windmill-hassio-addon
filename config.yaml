@@ -1,5 +1,5 @@
 name: Windmill
-version: "0.1.1"
+version: "0.1.2"
 slug: windmill
 description: Windmill — open-source, code-first orchestration platform for internal software. Sidecar for Home Assistant.
 url: https://github.com/WickM/windmill-hassio-addon
